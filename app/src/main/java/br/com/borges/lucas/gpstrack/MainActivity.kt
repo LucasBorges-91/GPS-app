@@ -5,13 +5,12 @@ import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Build
 import android.os.Bundle
+import android.os.Looper
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import br.com.borges.lucas.gpstrack.databinding.ActivityMainBinding
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationRequest
-import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.*
 import com.google.android.gms.tasks.OnSuccessListener
 
 class MainActivity : AppCompatActivity() {
@@ -33,6 +32,8 @@ class MainActivity : AppCompatActivity() {
   // Googles API for location services
   private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
 
+  private lateinit var  locationCallBack: LocationCallback
+
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     binding = ActivityMainBinding.inflate(layoutInflater)
@@ -49,6 +50,16 @@ class MainActivity : AppCompatActivity() {
       priority = LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY
     }
 
+    locationCallBack = object : LocationCallback() {
+      override fun onLocationResult(locationResult: LocationResult) {
+        super.onLocationResult(locationResult)
+
+        // Save the location
+        val location : Location = locationResult.lastLocation
+        updateUIValues(location)
+      }
+    }
+
 
     binding.swGps.setOnClickListener {
       if (binding.swGps.isChecked) {
@@ -62,8 +73,41 @@ class MainActivity : AppCompatActivity() {
       }
     }
 
+
+    binding.swLocationsupdates.setOnClickListener {
+      if ( binding.swLocationsupdates.isChecked ) {
+
+        // Tunr on location tracking
+        startLocationUpdates()
+      }
+      else {
+
+        // Turn off location tracking
+        stopLocationUpdates()
+      }
+    }
+
     updateGPS()
   } // End onCreate method
+
+  private fun stopLocationUpdates() {
+    binding.tvUpdates.text = "Location is NOT being tracked"
+    binding.tvLat.text = "Not tracking location"
+    binding.tvLon.text = "Not tracking location"
+    binding.tvSpeed.text = "Not tracking location"
+    binding.tvAddress.text = "Not tracking location"
+    binding.tvAccuracy.text = "Not tracking location"
+    binding.tvAltitude.text = "Not tracking location"
+    binding.tvSensor.text = "Not tracking location"
+
+    fusedLocationProviderClient.removeLocationUpdates(locationCallBack)
+  }
+
+  private fun startLocationUpdates() {
+    binding.tvUpdates.text = "Location is being tracked"
+    fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallBack, Looper.myLooper()!! )
+    updateGPS()
+  }
 
   override fun onRequestPermissionsResult(
     requestCode: Int,
@@ -107,13 +151,6 @@ class MainActivity : AppCompatActivity() {
           // We got permissions. Put the values of location. XXX into the UI components.
           if (location != null) {
             updateUIValues(location)
-          }
-          else {
-            Toast.makeText(
-              applicationContext,
-              "NULL",
-              Toast.LENGTH_SHORT
-            ).show()
           }
         }
 
