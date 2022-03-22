@@ -9,15 +9,15 @@ class MyApplication : Application() {
     private lateinit var singleton : MyApplication
   }
 
-  private lateinit var myLocations : List<Location>
+  lateinit var myLocations : MutableList<Location>
 
   fun getInstance() : MyApplication {
     return singleton
   }
 
-  fun onCreate() {
+  override fun onCreate() {
     super.onCreate()
     singleton = this
-    myLocations = listOf()
+    myLocations = mutableListOf()
   }
 }

@@ -29,13 +29,19 @@ class MainActivity : AppCompatActivity() {
   // Variable to remember if we are tracking location or not
   private var updateOn: Boolean = false
 
+  // Current location
+  private lateinit var currentLocation: Location
+
+  // List of saved locations
+  private var savedLocation: MutableList<Location> = mutableListOf()
+
   // Location request is a config file for all settings related to FusedLocationProviderClient
   private lateinit var locationRequest: LocationRequest
 
   // Googles API for location services
   private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
 
-  private lateinit var  locationCallBack: LocationCallback
+  private lateinit var locationCallBack: LocationCallback
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -58,9 +64,19 @@ class MainActivity : AppCompatActivity() {
         super.onLocationResult(locationResult)
 
         // Save the location
-        val location : Location = locationResult.lastLocation
+        val location: Location = locationResult.lastLocation
         updateUIValues(location)
       }
+    }
+
+    binding.btnNewWayPoint.setOnClickListener {
+
+      // Get the gps location
+
+      // Add the new location to the global list
+      val myApplication : MyApplication = applicationContext as MyApplication
+      savedLocation = myApplication.myLocations
+      savedLocation.add(currentLocation)
     }
 
 
@@ -78,12 +94,11 @@ class MainActivity : AppCompatActivity() {
 
 
     binding.swLocationsupdates.setOnClickListener {
-      if ( binding.swLocationsupdates.isChecked ) {
+      if (binding.swLocationsupdates.isChecked) {
 
         // Tunr on location tracking
         startLocationUpdates()
-      }
-      else {
+      } else {
 
         // Turn off location tracking
         stopLocationUpdates()
@@ -108,7 +123,11 @@ class MainActivity : AppCompatActivity() {
 
   private fun startLocationUpdates() {
     binding.tvUpdates.text = "Location is being tracked"
-    fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallBack, Looper.myLooper()!! )
+    fusedLocationProviderClient.requestLocationUpdates(
+      locationRequest,
+      locationCallBack,
+      Looper.myLooper()!!
+    )
     updateGPS()
   }
 
@@ -154,6 +173,7 @@ class MainActivity : AppCompatActivity() {
           // We got permissions. Put the values of location. XXX into the UI components.
           if (location != null) {
             updateUIValues(location)
+            currentLocation = location
           }
         }
 
@@ -170,7 +190,7 @@ class MainActivity : AppCompatActivity() {
     }
   }
 
-  private fun updateUIValues( location: Location ) {
+  private fun updateUIValues(location: Location) {
 
     // Update all of the text view objects with a new location.
     binding.tvLat.text = location.latitude.toString()
@@ -179,25 +199,27 @@ class MainActivity : AppCompatActivity() {
 
     if (location.hasAltitude()) {
       binding.tvAltitude.text = location.altitude.toString()
-    }
-    else {
+    } else {
       binding.tvAltitude.text = "Not available"
     }
 
     if (location.hasSpeed()) {
       binding.tvSpeed.text = location.speed.toString()
-    }
-    else {
+    } else {
       binding.tvSpeed.text = "Not available"
     }
 
-    val geocoder : Geocoder = Geocoder( applicationContext )
+    val geocoder: Geocoder = Geocoder(applicationContext)
     try {
-      val addresses : List<Address> = geocoder.getFromLocation( location.latitude, location.longitude, 1)
+      val addresses: List<Address> =
+        geocoder.getFromLocation(location.latitude, location.longitude, 1)
       binding.tvAddress.text = addresses[0].getAddressLine(0)
-    }
-    catch ( e : Exception ) {
+    } catch (e: Exception) {
       binding.tvAddress.text = "Unable to get street address"
     }
+
+    // Show the number of waypoints saved.
+
+    binding.tvCountOfCrumbs.text = savedLocation.size.toString()
   }
 }
