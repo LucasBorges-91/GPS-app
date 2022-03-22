@@ -2,6 +2,8 @@ package br.com.borges.lucas.gpstrack
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.location.Address
+import android.location.Geocoder
 import android.location.Location
 import android.os.Build
 import android.os.Bundle
@@ -12,6 +14,7 @@ import androidx.core.app.ActivityCompat
 import br.com.borges.lucas.gpstrack.databinding.ActivityMainBinding
 import com.google.android.gms.location.*
 import com.google.android.gms.tasks.OnSuccessListener
+import java.lang.Exception
 
 class MainActivity : AppCompatActivity() {
 
@@ -186,6 +189,15 @@ class MainActivity : AppCompatActivity() {
     }
     else {
       binding.tvSpeed.text = "Not available"
+    }
+
+    val geocoder : Geocoder = Geocoder( applicationContext )
+    try {
+      val addresses : List<Address> = geocoder.getFromLocation( location.latitude, location.longitude, 1)
+      binding.tvAddress.text = addresses[0].getAddressLine(0)
+    }
+    catch ( e : Exception ) {
+      binding.tvAddress.text = "Unable to get street address"
     }
   }
 }
