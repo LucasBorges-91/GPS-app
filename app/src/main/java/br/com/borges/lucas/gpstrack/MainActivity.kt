@@ -85,6 +85,11 @@ class MainActivity : AppCompatActivity() {
       startActivity(i)
     }
 
+    binding.btnShowMap.setOnClickListener {
+      val i : Intent =  Intent( this, MapsActivity::class.java )
+      startActivity(i)
+    }
+
 
     binding.swGps.setOnClickListener {
       if (binding.swGps.isChecked) {
