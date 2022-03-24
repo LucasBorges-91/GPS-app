@@ -3,6 +3,7 @@ package br.com.borges.lucas.gpstrack
 import android.location.Location
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.widget.Toast
 
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -11,6 +12,7 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import br.com.borges.lucas.gpstrack.databinding.ActivityMapsBinding
+import com.google.android.gms.maps.model.Marker
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -50,6 +52,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     val sydney = LatLng(-34.0, 151.0)
     //mMap.addMarker(MarkerOptions().position(sydney).title("Marker in Sydney"))
     //mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney))
+    var lastLocationPlaced : LatLng = sydney
 
     for (location in savedLocations) {
       val latLng: LatLng = LatLng(location.latitude, location.longitude)
@@ -57,6 +60,26 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
       markerOptions.position(latLng)
       markerOptions.title( "Lat: ${location.latitude}, Lon: ${location.longitude}")
       mMap.addMarker(markerOptions)
+      lastLocationPlaced = latLng
     }
+
+    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(lastLocationPlaced, 12.0f))
+    mMap.setOnMarkerClickListener( object : GoogleMap.OnMarkerClickListener {
+      override fun onMarkerClick(marker: Marker): Boolean {
+
+        // Lets count the number of times the pin is clicked.
+
+        var clicks = marker.tag as? Int
+
+        if ( clicks == null ) {
+          clicks = 0
+        }
+        clicks += 1
+        marker.tag = clicks
+        Toast.makeText( applicationContext, "Marker ${marker.title} was clicked ${marker.tag} times.", Toast.LENGTH_SHORT).show()
+
+        return false
+      }
+    })
   }
 }
