@@ -4,6 +4,7 @@
 
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
     <application
         android:name=".MyApplication"
         android:allowBackup="true"
@@ -13,9 +14,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.GPSTrack">
         <activity
+            android:name=".ShowSavedLocationsListActivity"
+            android:exported="false" />
+        <activity
             android:name=".MainActivity"
-            android:foregroundServiceType="location"
-            android:exported="true">
+            android:exported="true"
+            android:foregroundServiceType="location">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
